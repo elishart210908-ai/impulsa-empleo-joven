@@ -1,0 +1,8 @@
+{
+  "name": "TalentoJoven",
+  "description": "Conecta a estudiantes y jóvenes con su primer empleo, prácticas profesionales, becas y oportunidades laborales.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
