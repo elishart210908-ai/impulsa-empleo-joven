@@ -31,6 +31,7 @@ export interface Opportunity {
   applicantsCount?: number;
   lat?: number;
   lng?: number;
+  matchReason?: string;
 }
 
 export type ApplicationStatus = 'Guardada' | 'Enviada' | 'En Revisión' | 'Entrevista Programada' | 'Oferta Recibida' | 'Descartada';

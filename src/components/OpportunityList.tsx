@@ -9,6 +9,8 @@ interface OpportunityListProps {
   selectedField: string;
   setSelectedField: (field: string) => void;
   onSelectOpportunity: (opp: Opportunity) => void;
+  onRegenerateOpportunities?: () => void;
+  isRegenerating?: boolean;
 }
 
 export const OpportunityList: React.FC<OpportunityListProps> = ({
@@ -17,7 +19,9 @@ export const OpportunityList: React.FC<OpportunityListProps> = ({
   setSearchTerm,
   selectedField,
   setSelectedField,
-  onSelectOpportunity
+  onSelectOpportunity,
+  onRegenerateOpportunities,
+  isRegenerating
 }) => {
   const [selectedType, setSelectedType] = useState<string>('todos');
   const [selectedModality, setSelectedModality] = useState<string>('todas');
@@ -42,9 +46,21 @@ export const OpportunityList: React.FC<OpportunityListProps> = ({
         {/* Filters Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Oportunidades Disponibles
-            </h2>
+            <div className="flex items-center gap-3">
+              <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                Oportunidades Disponibles
+              </h2>
+              {onRegenerateOpportunities && (
+                <button
+                  onClick={onRegenerateOpportunities}
+                  disabled={isRegenerating}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-semibold rounded-xl shadow-md transition-all disabled:opacity-50"
+                >
+                  <Sparkles className={`w-3.5 h-3.5 ${isRegenerating ? 'animate-spin' : ''}`} />
+                  <span>{isRegenerating ? 'Generando con IA...' : '✨ Regenerar según mi perfil'}</span>
+                </button>
+              )}
+            </div>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
               Mostrando {filteredOpportunities.length} resultados para tu búsqueda
             </p>
@@ -145,9 +161,17 @@ export const OpportunityList: React.FC<OpportunityListProps> = ({
                   </div>
 
                   {/* Description preview */}
-                  <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-3 mb-6">
+                  <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-3 mb-4">
                     {opp.description}
                   </p>
+
+                  {/* AI Match Reason Preview */}
+                  {opp.matchReason && (
+                    <div className="mb-4 p-2.5 rounded-xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50 flex items-start gap-2">
+                      <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                      <p className="text-[11px] text-blue-800 dark:text-blue-200 line-clamp-2">{opp.matchReason}</p>
+                    </div>
+                  )}
                 </div>
 
                 <div>

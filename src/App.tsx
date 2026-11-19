@@ -10,6 +10,7 @@ import { RecruiterDashboard } from './components/RecruiterDashboard';
 import { NearbyMap } from './components/NearbyMap';
 import { ResourcesSection } from './components/ResourcesSection';
 import { ProfileModal } from './components/ProfileModal';
+import { LoginModal } from './components/LoginModal';
 import { INITIAL_OPPORTUNITIES, INITIAL_EVENTS } from './data/mockData';
 import { Opportunity, Application, CareerEvent, UserProfile, ApplicationStatus } from './types';
 
@@ -36,18 +37,79 @@ export default function App() {
   const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
-  const [userProfile, setUserProfile] = useState<UserProfile>({
-    name: 'Alejandro Ruiz',
-    email: 'alejandro.ruiz@universidad.edu',
-    role: 'estudiante',
-    career: 'Ingeniería en Sistemas Computacionales',
-    university: 'Universidad Nacional Autónoma',
-    skills: ['React', 'TypeScript', 'JavaScript', 'Tailwind CSS', 'Git'],
-    bio: 'Estudiante de último año apasionado por el desarrollo web y la creación de experiencias digitales excepcionales.'
+  // User session state: load current logged in user email and their isolated profile
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(() => {
+    const currentEmail = localStorage.getItem('talentojoven_current_email');
+    if (currentEmail) {
+      const saved = localStorage.getItem(`talentojoven_profile_${currentEmail}`);
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.error('Error parsing user profile', e);
+        }
+      }
+    }
+    // Return null if no authenticated user session exists so LoginModal shows
+    return null;
   });
 
+  const [isRegenerating, setIsRegenerating] = useState(false);
+
+  const handleLogin = (profile: UserProfile) => {
+    setUserProfile(profile);
+    localStorage.setItem('talentojoven_current_email', profile.email);
+    localStorage.setItem(`talentojoven_profile_${profile.email}`, JSON.stringify(profile));
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('talentojoven_current_email');
+    setUserProfile(null);
+    setIsProfileOpen(false);
+  };
+
+  const handleLoadDemoProfile = () => {
+    const demoProfile: UserProfile = {
+      name: 'Alejandro Ruiz',
+      email: 'alejandro.ruiz@universidad.edu',
+      role: 'estudiante',
+      career: 'Ingeniería en Sistemas Computacionales',
+      university: 'Universidad Nacional Autónoma',
+      skills: ['React', 'TypeScript', 'JavaScript', 'Tailwind CSS', 'Git'],
+      bio: 'Estudiante de último año apasionado por el desarrollo web y la creación de experiencias digitales excepcionales.'
+    };
+    handleLogin(demoProfile);
+  };
+
+  const handleSaveProfile = (updated: UserProfile) => {
+    setUserProfile(updated);
+    localStorage.setItem(`talentojoven_profile_${updated.email}`, JSON.stringify(updated));
+  };
+
+  const handleRegenerateOpportunities = async () => {
+    if (!userProfile) return;
+    setIsRegenerating(true);
+    try {
+      const res = await fetch('/api/gemini/personalized-opportunities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ profile: userProfile })
+      });
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        setOpportunities(data);
+      } else {
+        alert('No se pudieron generar nuevas oportunidades. Intenta más tarde.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error al conectar con la IA para regenerar oportunidades.');
+    } finally {
+      setIsRegenerating(false);
+    }
+  };
+
   const handleApply = (opp: Opportunity, notes?: string) => {
-    // Check if already applied
     const existing = applications.find((a) => a.opportunityId === opp.id);
     if (existing) return;
 
@@ -83,6 +145,18 @@ export default function App() {
 
   const alreadyAppliedSelected = selectedOpportunity ? applications.some(a => a.opportunityId === selectedOpportunity.id) : false;
 
+  // If no user is logged in, show LoginModal
+  if (!userProfile) {
+    return (
+      <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center p-4">
+        <LoginModal
+          onLogin={handleLogin}
+          onLoadDemoProfile={handleLoadDemoProfile}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans antialiased selection:bg-blue-600 selection:text-white">
       
@@ -117,6 +191,8 @@ export default function App() {
                 selectedField={selectedField}
                 setSelectedField={setSelectedField}
                 onSelectOpportunity={(opp) => setSelectedOpportunity(opp)}
+                onRegenerateOpportunities={handleRegenerateOpportunities}
+                isRegenerating={isRegenerating}
               />
             </div>
           </>
@@ -171,8 +247,9 @@ export default function App() {
       {isProfileOpen && (
         <ProfileModal
           userProfile={userProfile}
-          onSaveProfile={(updated) => setUserProfile(updated)}
+          onSaveProfile={handleSaveProfile}
           onClose={() => setIsProfileOpen(false)}
+          onLogout={handleLogout}
         />
       )}
 

@@ -5,8 +5,8 @@ import { UserProfile } from '../types';
 interface NavbarProps {
   currentView: string;
   setCurrentView: (view: string) => void;
-  userProfile: UserProfile;
-  setUserProfile: React.Dispatch<React.SetStateAction<UserProfile>>;
+  userProfile: UserProfile | null;
+  setUserProfile: React.Dispatch<React.SetStateAction<UserProfile | null>>;
   onOpenProfile: () => void;
 }
 
@@ -16,6 +16,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   userProfile,
   onOpenProfile
 }) => {
+  if (!userProfile) return null;
+
   return (
     <header className="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-8">

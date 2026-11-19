@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, User, GraduationCap, Mail, Award, CheckCircle2, FileText, Printer } from 'lucide-react';
+import { X, User, GraduationCap, Mail, Award, CheckCircle2, FileText, Printer, LogOut } from 'lucide-react';
 import { UserProfile } from '../types';
 import { CvPdfModal } from './CvPdfModal';
 
@@ -7,12 +7,14 @@ interface ProfileModalProps {
   userProfile: UserProfile;
   onSaveProfile: (profile: UserProfile) => void;
   onClose: () => void;
+  onLogout?: () => void;
 }
 
 export const ProfileModal: React.FC<ProfileModalProps> = ({
   userProfile,
   onSaveProfile,
-  onClose
+  onClose,
+  onLogout
 }) => {
   const [name, setName] = useState(userProfile.name);
   const [email, setEmail] = useState(userProfile.email);
@@ -60,7 +62,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
               </div>
               <div>
                 <h3 className="text-lg font-bold text-slate-900 dark:text-white">Perfil Profesional</h3>
-                <p className="text-xs text-slate-500">Actualiza tus datos para destacar ante reclutadores</p>
+                <p className="text-xs text-slate-500">Sesión activa: {userProfile.email}</p>
               </div>
             </div>
             <button
@@ -88,14 +90,13 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                Correo Electrónico
+                Correo Electrónico (Bloqueado)
               </label>
               <input
                 type="email"
-                required
+                disabled
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm text-slate-900 dark:text-white outline-none focus:border-blue-500"
+                className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/50 text-sm text-slate-500 cursor-not-allowed outline-none"
               />
             </div>
 
@@ -171,20 +172,33 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
               </button>
             </div>
 
-            <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2.5 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-xl transition-all shadow-md"
-              >
-                Guardar Perfil
-              </button>
+            <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3">
+              {onLogout && (
+                <button
+                  type="button"
+                  onClick={onLogout}
+                  className="flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Cerrar Sesión</span>
+                </button>
+              )}
+
+              <div className="flex items-center gap-2 ml-auto">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-4 py-2.5 text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-xl transition-all shadow-md"
+                >
+                  Guardar Perfil
+                </button>
+              </div>
             </div>
           </form>
 

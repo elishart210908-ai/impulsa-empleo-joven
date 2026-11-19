@@ -62,6 +62,17 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
 
         {/* Modal Body */}
         <div className="p-6 space-y-6 flex-1">
+
+          {/* AI Match Reason Banner */}
+          {opportunity.matchReason && (
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 border border-blue-200 dark:border-blue-900 flex items-start gap-3">
+              <Sparkles className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-xs font-bold text-blue-900 dark:text-blue-300 uppercase tracking-wider mb-1">¿Por qué coincide con tu perfil?</h4>
+                <p className="text-xs text-blue-800 dark:text-blue-200 leading-relaxed">{opportunity.matchReason}</p>
+              </div>
+            </div>
+          )}
           
           {/* Compensation & Modality card */}
           <div className="grid grid-cols-2 gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">

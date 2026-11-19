@@ -139,6 +139,65 @@ app.post("/api/gemini/roadmap", async (req, res) => {
   }
 });
 
+app.post("/api/gemini/personalized-opportunities", async (req, res) => {
+  try {
+    const { profile } = req.body;
+    const prompt = `REGLA OBLIGATORIA E INQUEBRANTABLE DEL SISTEMA:
+    Cada usuario debe recibir EXCLUSIVAMENTE oportunidades relacionadas directamente con su carrera universitaria.
+    
+    Datos del usuario:
+    - Carrera / Especialidad exacta: ${profile.career}
+    - Universidad: ${profile.university}
+    - Habilidades: ${profile.skills.join(', ')}
+    - Intereses / Bio: ${profile.bio}
+
+    REGLAS DE ORO:
+    1. La carrera "${profile.career}" es el ÚNICO campo profesional permitido. No mezcles carreras ni recomiendes empleos de otras áreas profesionales bajo ninguna circunstancia.
+    2. Las prácticas, becas, empleos junior y programas para estudiantes deben estar directamente vinculados a la formación académica de "${profile.career}".
+    3. Si las habilidades o intereses del usuario no coinciden con su carrera, ignóralos para el campo profesional y céntrate 100% en la carrera registrada.
+    4. Cada oportunidad debe incluir requisitos claros, ubicación, modalidad y una explicación ("matchReason") de por qué está directamente relacionada con la carrera de "${profile.career}".
+    5. Preséntalas claramente como ejemplos y recomendaciones de orientación profesional adaptadas a su carrera.
+
+    Devuelve un JSON con un array de objetos con esta estructura exacta:
+    [
+      {
+        "id": "gen-1",
+        "title": "...",
+        "company": "...",
+        "type": "empleo",
+        "modality": "hibrido",
+        "field": "Tecnología",
+        "location": "...",
+        "stipendOrSalary": "...",
+        "description": "...",
+        "requirements": ["..."],
+        "benefits": ["..."],
+        "postedDate": "Hace un momento",
+        "deadline": "30 de Diciembre, 2026",
+        "featured": true,
+        "applicantsCount": 15,
+        "lat": 19.4326,
+        "lng": -99.1332,
+        "matchReason": "..."
+      }
+    ]`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+      }
+    });
+
+    const result = JSON.parse(response.text || "[]");
+    res.json(result);
+  } catch (error: any) {
+    console.error("Error generating personalized opportunities:", error);
+    res.status(500).json({ error: error.message || "Error al generar oportunidades personalizadas con IA" });
+  }
+});
+
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
